@@ -1,0 +1,6 @@
+{
+    "name": "LocalAudio",
+    "tree": {
+        "$path": "./src"
+    }
+}
