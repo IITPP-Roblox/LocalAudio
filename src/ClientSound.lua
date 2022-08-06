@@ -12,6 +12,7 @@ local AudioData = require(script.Parent:WaitForChild("AudioData"))
 local LocalAudioTypes = require(script.Parent:WaitForChild("LocalAudioTypes"))
 
 local ClientSound = {}
+ClientSound.InitialTimePositionIgnore = 0.5
 ClientSound.__index = ClientSound
 
 
@@ -89,7 +90,19 @@ function ClientSound:Update()
 
     --Update the sound state.
     if ReplicationData.State == "Play" and not self.Sound.Playing then
-        self.Sound.TimePosition = (Workspace:GetServerTimeNow() - ReplicationData.StartTime) % self.SoundData.Length
+        --Determine the time position.
+        --The time position is ignored if the sound was just started and is not looped.
+        local TimePosition = Workspace:GetServerTimeNow() - ReplicationData.StartTime
+        if TimePosition < self.InitialTimePositionIgnore then
+            TimePosition = 0
+        end
+        if self.Sound.Looped then
+            TimePosition = TimePosition % self.SoundData.Length
+        end
+
+        --Play the sound if the audio is still going.
+        if TimePosition > self.SoundData.Length then return end
+        self.Sound.TimePosition = TimePosition
         self.Sound:Play()
     elseif ReplicationData.State == "Stop" and self.Sound.Playing then
         self.Sound:Stop()
