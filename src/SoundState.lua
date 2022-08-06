@@ -11,6 +11,7 @@ local AudioData = require(script.Parent:WaitForChild("AudioData"))
 local LocalAudioTypes = require(script.Parent:WaitForChild("LocalAudioTypes"))
 
 local SoundState = {}
+SoundState.AutomaticClearDelay = 3 --An additional delay is added to clearing audios to mitigate audios cutting out on the client.
 SoundState.__index = SoundState
 
 local CurrentAudioFolder = script.Parent:WaitForChild("CurrentAudio")
@@ -102,7 +103,7 @@ function SoundState:Save(): nil
     if self.SoundData.Properties and self.SoundData.Properties.Looped then return end
     if self.State.State ~= "Play" then return end
     local DurationMultiplier = (self.SoundData.Properties and (1 / (self.SoundData.Properties.PlaybackSpeed or 1)) or 1)
-    local RemainingTime = (self.SoundData.Length * DurationMultiplier) - (Workspace:GetServerTimeNow() - self.State.StartTime)
+    local RemainingTime = (self.SoundData.Length * DurationMultiplier) - (Workspace:GetServerTimeNow() - self.State.StartTime) + self.AutomaticClearDelay
     task.delay(RemainingTime, function()
         if self.LastSaveTime ~= LastSaveTime then return end
         self:Stop()
