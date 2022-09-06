@@ -94,7 +94,7 @@ function ClientSound:Update()
         --The time position is ignored if the sound was just started and is not looped.
         local TimePosition = Workspace:GetServerTimeNow() - ReplicationData.StartTime
         if TimePosition < self.InitialTimePositionIgnore then
-            TimePosition = 0
+            TimePosition = (self.SoundData.Properties and self.SoundData.Properties.TimePosition) or 0
         end
         if self.Sound.Looped then
             TimePosition = TimePosition % self.SoundData.Length
