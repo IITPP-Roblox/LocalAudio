@@ -8,6 +8,7 @@ local ContentProvider = game:GetService("ContentProvider")
 local RunService = game:GetService("RunService")
 
 local AudioData = require(script:WaitForChild("AudioData"))
+local LocalAudioTypes = require(script:WaitForChild("LocalAudioTypes"))
 
 local LocalAudio = {}
 LocalAudio.PreloadedAudios = {}
@@ -33,6 +34,12 @@ else
 
     LocalAudio.OnEventBindableEvent = Instance.new("BindableEvent")
     LocalAudio.OnEvent = LocalAudio.OnEventBindableEvent.Event
+    LocalAudio.NameEvents = {}
+    LocalAudio.OnEvent:Connect(function(Id: string, Event: LocalAudioTypes.SoundDataEntryEvent, Parent: Instance?)
+        if not Event.Name then return end
+        if not LocalAudio.NameEvents[Event.Name] then return end
+        LocalAudio.NameEvents[Event.Name]:Fire(Id, Event, Parent)
+    end)
 end
 
 local ClientSound = require(script:WaitForChild("ClientSound"))
@@ -204,6 +211,16 @@ function LocalAudio:SetEffects(Id: string, Parent: Instance?, Effects: {[string]
         if not StateObject or StateObject.State.State ~= "Play" then continue end
         StateObject:SetEffects(Effects)
     end
+end
+
+--[[
+Returns an event specific to the an event of a specific name being fired.
+--]]
+function LocalAudio:OnEventFired(Name: string): RBXScriptSignal
+    if not self.NameEvents[Name] then
+        self.NameEvents[Name] = Instance.new("BindableEvent")
+    end
+    return self.NameEvents[Name].Event
 end
 
 --[[

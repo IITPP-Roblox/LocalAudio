@@ -15,3 +15,7 @@ LocalAudio.OnEvent:Connect(function(Id, Event, Parent)
         Parent.BrickColor = BrickColor.random()
     end
 end)
+
+LocalAudio:OnEventFired("CheerStart"):Connect(function(_, _, Parent)
+    print("Cheer sound started on "..tostring(Parent))
+end)
