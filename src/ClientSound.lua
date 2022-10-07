@@ -104,6 +104,51 @@ function ClientSound:Update()
         if TimePosition > self.SoundData.Length then return end
         self.Sound.TimePosition = TimePosition
         self.Sound:Play()
+
+        --Start running events.
+        if not self.SoundData.Events then return end
+        table.sort(self.SoundData.Events, function(a: LocalAudioTypes.SoundDataEntryEvent, b: LocalAudioTypes.SoundDataEntryEvent)
+            return a.Time < b.Time
+        end)
+
+        task.spawn(function()
+            --Wait for the audio to load.
+            if not self.Sound.IsLoaded then
+                self.Sound.Loaded:Wait()
+            end
+
+            --Determine the event to start at.
+            local LastEventTime = TimePosition
+            local CurrentEventId = 1
+            for i, Event in self.SoundData.Events do
+                if Event.Time < TimePosition then
+                    CurrentEventId = i + 1
+                end
+            end
+
+            --Process events while the sound is playing.
+            while self.Sound.Playing do
+                --Get the current time and reset the last time if the audio looped.
+                local CurrentEventTime = self.Sound.TimePosition
+                if LastEventTime > CurrentEventTime then
+                    CurrentEventId = 1
+                    LastEventTime = 0
+                end
+
+                --Process events until an event in the future is reached (or all events are reached).
+                while true do
+                    local CurrentEvent = self.SoundData.Events[CurrentEventId]
+                    if not CurrentEvent or CurrentEvent.Time > CurrentEventTime then
+                        break
+                    elseif CurrentEvent.Time <= CurrentEventTime and CurrentEvent.Time >= LastEventTime then
+                        --TODO: Invoke events.
+                    end
+                    CurrentEventId += 1
+                end
+                LastEventTime = CurrentEventTime
+                task.wait()
+            end
+        end)
     elseif ReplicationData.State == "Stop" and self.Sound.Playing then
         self.Sound:Stop()
     end

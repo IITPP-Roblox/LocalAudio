@@ -13,6 +13,34 @@ return {
             Local = {
                 Id = 12222253,
                 Length = 1.207,
+                Events = {
+                    {
+                        Time = 0,
+                        Name = "CheerStart",
+                    },
+                    {
+                        Time = 0.2,
+                        Name = "CheerSecond",
+                    },
+                },
+            },
+            LocalLooped = {
+                Id = 12222253,
+                Length = 1.207,
+                Events = {
+                    {
+                        Time = 0,
+                        Name = "CheerStart",
+                    },
+                    {
+                        Time = 0.2,
+                        Name = "CheerSecond",
+                    },
+                },
+                Properties = {
+                    Volume = 0.2,
+                    Looped = true,
+                },
             },
             Global = {
                 Id = 12221967,

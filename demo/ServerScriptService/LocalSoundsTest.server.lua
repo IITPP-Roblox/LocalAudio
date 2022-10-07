@@ -18,6 +18,7 @@ local TestParts = {
 
 
 
+LocalAudio:PlayAudio("Demo.LocalLooped", TestModels:WaitForChild("Part5"))
 while true do
     for _, TestPart in pairs(TestParts) do
         LocalAudio:PlayAudio("Demo.Local", TestPart)

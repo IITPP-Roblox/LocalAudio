@@ -10,11 +10,18 @@ export type SoundData = {
     Sounds: {[string]: SoundDataEntry},
 }
 
+export type SoundDataEntryEvent = {
+    Time: number,
+    Name: string,
+    [string]: any,
+}
+
 export type SoundDataEntry = {
     Id: number,
     Length: number,
     Properties: {[string]: any}?,
     Effects: {[string]: {[string]: any}}?,
+    Eventts: {SoundDataEntryEvent}?,
     [string]: SoundDataEntry,
 }
 
