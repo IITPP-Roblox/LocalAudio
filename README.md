@@ -101,6 +101,24 @@ The following is an example of the data:
                         Level = 0.5,
                     },
                 },
+                Event = { --Events that will fire when a time is reached.
+                    {
+                        Time = 0,
+                        Name = "MyEvent1",
+                    },
+                    {
+                        Time = 0.2,
+                        Name = "MyEvent1", --Names don't have to be unique.
+                    },
+                    {
+                        Time = 1,
+                        Name = "MyEvent2",
+                    },
+                    {
+                        Time = 1, --Times don't have to be unique.
+                        Name = "MyEvent3",
+                    },
+                },
             },
         },
         Test2 = { --Playable as "Test2"
@@ -134,6 +152,8 @@ The following is an example of the data:
 # API
 The API intended to be used is made up of static functions that map to the native
 Roblox methods, including:
+- `LocalAudio.OnEvent: RBXScriptSignal<string, SoundDataEntryEvent, Instance?>` - Event that is fired when a sound has an event.
+- `LocalAudio:OnOnEventFired(Name: string): RBXScriptSignal<string, SoundDataEntryEvent, Instance?>` - Returns an event that is fired when an event from a sound of the given name is fired.
 - `LocalAudio:PreloadAudio(Id: string): nil` - Preloads an audio.
 - `LocalAudio:PlayAudio(Id: string, Parent: Instance?): nil` - Plays an audio.
 - `LocalAudio:ResumeAudio(Id: string, Parent: Instance?): nil` - Resumes an audio if one is paused.
