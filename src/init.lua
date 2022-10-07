@@ -30,6 +30,9 @@ if RunService:IsServer() then
 else
     PreloadAudioEvent = script:WaitForChild("PreloadAudio")
     CurrentAudioFolder = script:WaitForChild("CurrentAudio")
+
+    LocalAudio.OnEventBindableEvent = Instance.new("BindableEvent")
+    LocalAudio.OnEvent = LocalAudio.OnEventBindableEvent.Event
 end
 
 local ClientSound = require(script:WaitForChild("ClientSound"))
@@ -60,10 +63,10 @@ local function ConnectParent(Parent: Instance): nil
     Parent.ChildAdded:Connect(function(ChildValue)
         --OpenSlot is called in case the client has started an audio before the server plays a new one.
         LocalAudio:OpenSlot(ChildValue.Name, true)
-        ClientSound.new(ChildValue.Name, ChildValue, SoundPart)
+        ClientSound.new(ChildValue.Name, ChildValue, SoundPart, LocalAudio.OnEventBindableEvent)
     end)
     for _, ChildValue in pairs(Parent:GetChildren()) do
-        ClientSound.new(ChildValue.Name, ChildValue, SoundPart)
+        ClientSound.new(ChildValue.Name, ChildValue, SoundPart, LocalAudio.OnEventBindableEvent)
     end
 end
 

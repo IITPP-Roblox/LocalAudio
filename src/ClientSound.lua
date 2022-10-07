@@ -20,10 +20,13 @@ ClientSound.__index = ClientSound
 --[[
 Creates the client sound.
 --]]
-function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Instance?): LocalAudioTypes.ClientSound
+function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Instance?, OnEvent: BindableEvent): LocalAudioTypes.ClientSound
     --Create the object.
     local self = {
+        Id = Id,
+        Parent = Parent,
         ReplicationValue = ReplicationValue,
+        OnEvent = OnEvent,
     }
     setmetatable(self, ClientSound)
 
@@ -141,7 +144,7 @@ function ClientSound:Update()
                     if not CurrentEvent or CurrentEvent.Time > CurrentEventTime then
                         break
                     elseif CurrentEvent.Time <= CurrentEventTime and CurrentEvent.Time >= LastEventTime then
-                        --TODO: Invoke events.
+                        self.OnEvent:Fire(self.Id, CurrentEvent, self.Parent)
                     end
                     CurrentEventId += 1
                 end
