@@ -133,7 +133,7 @@ function ClientSound:Update()
             while self.Sound.Playing do
                 --Get the current time and reset the last time if the audio looped.
                 local CurrentEventTime = self.Sound.TimePosition
-                if LastEventTime > CurrentEventTime then
+                if LastEventTime > CurrentEventTime and CurrentEventTime < 0.1 then
                     CurrentEventId = 1
                     LastEventTime = 0
                 end
