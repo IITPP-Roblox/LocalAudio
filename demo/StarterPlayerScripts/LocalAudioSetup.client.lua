@@ -7,7 +7,7 @@ Sets up the LocalAudio module.
 local LocalAudio = require(game:GetService("ReplicatedStorage"):WaitForChild("LocalAudio"))
 LocalAudio:SetUp()
 
-LocalAudio.OnEvent:Connect(function(Id, Event, Parent)
+LocalAudio.OnEvent:Connect(function(Id, Event, Parent, Sound)
     if not Parent then return end
     if Event.Name == "CheerStart" then
         Parent.BrickColor = BrickColor.random()
@@ -16,6 +16,6 @@ LocalAudio.OnEvent:Connect(function(Id, Event, Parent)
     end
 end)
 
-LocalAudio:OnEventFired("CheerStart"):Connect(function(_, _, Parent)
-    print("Cheer sound started on "..tostring(Parent))
+LocalAudio:OnEventFired("CheerStart"):Connect(function(_, _, Parent, Sound)
+    print("Cheer sound started on "..tostring(Parent).." in "..tostring(Sound))
 end)

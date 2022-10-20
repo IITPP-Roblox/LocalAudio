@@ -35,10 +35,10 @@ else
     LocalAudio.OnEventBindableEvent = Instance.new("BindableEvent")
     LocalAudio.OnEvent = LocalAudio.OnEventBindableEvent.Event
     LocalAudio.NameEvents = {}
-    LocalAudio.OnEvent:Connect(function(Id: string, Event: LocalAudioTypes.SoundDataEntryEvent, Parent: Instance?)
+    LocalAudio.OnEvent:Connect(function(Id: string, Event: LocalAudioTypes.SoundDataEntryEvent, Parent: Instance?, Sound: Sound)
         if not Event.Name then return end
         if not LocalAudio.NameEvents[Event.Name] then return end
-        LocalAudio.NameEvents[Event.Name]:Fire(Id, Event, Parent)
+        LocalAudio.NameEvents[Event.Name]:Fire(Id, Event, Parent, Sound)
     end)
 end
 

@@ -144,7 +144,7 @@ function ClientSound:Update()
                     if not CurrentEvent or CurrentEvent.Time > CurrentEventTime then
                         break
                     elseif CurrentEvent.Time <= CurrentEventTime and CurrentEvent.Time >= LastEventTime then
-                        self.OnEvent:Fire(self.Id, CurrentEvent, self.Parent)
+                        self.OnEvent:Fire(self.Id, CurrentEvent, self.Parent, self.Sound)
                     end
                     CurrentEventId += 1
                 end
