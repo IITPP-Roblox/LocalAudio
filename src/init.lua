@@ -29,17 +29,26 @@ if RunService:IsServer() then
     CurrentAudioFolder.Name = "CurrentAudio"
     CurrentAudioFolder.Parent = script
 else
+
+    if not _G.LocalAudioSingletonEvents then
+        local LocalAudioSingletonEvents = {}
+        _G.LocalAudioSingletonEvents = LocalAudioSingletonEvents
+        LocalAudioSingletonEvents.OnEventBindableEvent = Instance.new("BindableEvent")
+        LocalAudioSingletonEvents.OnEvent = LocalAudioSingletonEvents.OnEventBindableEvent.Event
+        LocalAudioSingletonEvents.NameEvents = {}
+
+        LocalAudioSingletonEvents.OnEvent:Connect(function(Id: string, Event: LocalAudioTypes.SoundDataEntryEvent, Parent: Instance?, Sound: Sound)
+            if not Event.Name then return end
+            if not LocalAudioSingletonEvents.NameEvents[Event.Name] then return end
+            LocalAudioSingletonEvents.NameEvents[Event.Name]:Fire(Id, Event, Parent, Sound)
+        end)
+    end
+    LocalAudio.OnEventBindableEvent = _G.LocalAudioSingletonEvents.OnEventBindableEvent
+    LocalAudio.OnEvent = _G.LocalAudioSingletonEvents.OnEvent
+    LocalAudio.NameEvents = _G.LocalAudioSingletonEvents.NameEvents
+
     PreloadAudioEvent = script:WaitForChild("PreloadAudio")
     CurrentAudioFolder = script:WaitForChild("CurrentAudio")
-
-    LocalAudio.OnEventBindableEvent = Instance.new("BindableEvent")
-    LocalAudio.OnEvent = LocalAudio.OnEventBindableEvent.Event
-    LocalAudio.NameEvents = {}
-    LocalAudio.OnEvent:Connect(function(Id: string, Event: LocalAudioTypes.SoundDataEntryEvent, Parent: Instance?, Sound: Sound)
-        if not Event.Name then return end
-        if not LocalAudio.NameEvents[Event.Name] then return end
-        LocalAudio.NameEvents[Event.Name]:Fire(Id, Event, Parent, Sound)
-    end)
 end
 
 local ClientSound = require(script:WaitForChild("ClientSound"))
