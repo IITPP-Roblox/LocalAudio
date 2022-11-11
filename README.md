@@ -68,8 +68,11 @@ following properties if it is storing an audio:
 - `Properties` (Optional): Dictionary where the keys are the names of the properties
   of the audio and the values are the values to set. `PlaybackSpeed`, `Looped`, and
   `TimePosition` are supported.
-- `Effects` (Optional): Dictionary where thee keys are the types of the `SoundEffect`
+- `Effects` (Optional): Dictionary where the keys are the types of the `SoundEffect`
   and the values are dictionaries of property names and values for the sound effects.
+- `Events` (Optional): List of dictionaries that are of the type `SoundDataEntryEvent`
+  with a `Time` for the time the event happens and the `Name` for the event. Additional
+  keys and values can be stored.
 
 The following is an example of the data:
 ```lua
@@ -101,7 +104,7 @@ The following is an example of the data:
                         Level = 0.5,
                     },
                 },
-                Event = { --Events that will fire when a time is reached.
+                Events = { --Events that will fire when a time is reached.
                     {
                         Time = 0,
                         Name = "MyEvent1",

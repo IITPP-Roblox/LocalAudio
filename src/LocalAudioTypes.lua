@@ -21,7 +21,7 @@ export type SoundDataEntry = {
     Length: number,
     Properties: {[string]: any}?,
     Effects: {[string]: {[string]: any}}?,
-    Eventts: {SoundDataEntryEvent}?,
+    Events: {SoundDataEntryEvent}?,
     [string]: SoundDataEntry,
 }
 
