@@ -64,7 +64,7 @@ function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Inst
     end)
 
     --Return the object.
-    return self
+    return self :: any
 end
 
 --[[

@@ -27,17 +27,17 @@ export type SoundDataEntry = {
 
 --Classes
 export type SoundState = {
-    Save: (SoundState) -> nil,
-    Play: (SoundState) -> nil,
-    Resume: (SoundState) -> nil,
-    Pause: (SoundState) -> nil,
-    Stop: (SoundState) -> nil,
-    SetEffects: (SoundState, {[string]: {[string]: any}}) -> nil,
+    Save: (SoundState) -> (),
+    Play: (SoundState) -> (),
+    Resume: (SoundState) -> (),
+    Pause: (SoundState) -> (),
+    Stop: (SoundState) -> (),
+    SetEffects: (SoundState, {[string]: {[string]: any}}) -> (),
     StateValue: StringValue,
 }
 
 export type ClientSound = {
-    Update: (ClientSound) -> nil,
+    Update: (ClientSound) -> (),
 }
 
 
