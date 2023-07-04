@@ -66,7 +66,7 @@ end
 --[[
 Connects a parent of values.
 --]]
-local function ConnectParent(Parent: Instance): nil
+local function ConnectParent(Parent: Instance): ()
     --Wait for the instance to exist.
     if Parent:IsA("ObjectValue") then
         while not Parent.Value do
@@ -91,13 +91,16 @@ end
 --[[
 Preloads an audio on the client.
 --]]
-function LocalAudio:PreloadAudio(Id: string): nil
+function LocalAudio:PreloadAudio(Id: string): ()
     if RunService:IsServer() then
         --Tell the clients to preload the audio.
         PreloadAudioEvent:FireAllClients(Id)
     else
         --Preload the audio.
-        local SoundId = "rbxassetid://"..tostring(SoundState.GetSoundData(Id).Id)
+        local SoundId = SoundState.GetSoundData(Id).Id
+        if typeof(SoundId) ~= "string" then
+            SoundId = "rbxassetid://"..tostring(SoundId)
+        end
         if self.PreloadedAudios[SoundId] then return end
         self.PreloadedAudios[SoundId] = true
 
@@ -136,7 +139,7 @@ end
 --[[
 Opens a slot for the given audio id to be played. Does nothing if there are no limits.
 --]]
-function LocalAudio:OpenSlot(Id: string, LeaveAtLimit: boolean?): nil
+function LocalAudio:OpenSlot(Id: string, LeaveAtLimit: boolean?): ()
     for Group, Limit in pairs(AudioData.MaxConcurrentTracks or {}) do
         if not IsInGroup(Id, Group) then continue end
         local SoundValues = self:GetValuesInGroup(Group)
@@ -154,7 +157,7 @@ end
 --[[
 Plays an audio on the client.
 --]]
-function LocalAudio:PlayAudio(Id: string, Parent: Instance?): nil
+function LocalAudio:PlayAudio(Id: string, Parent: Instance?): ()
     --Return if the audio is not able to open a slot.
     local SoundData = SoundState.GetSoundData(Id)
     if SoundData.LowPriority and not self:HasOpenSlot(Id) then
@@ -169,7 +172,7 @@ end
 --[[
 Reumes an audio on the client.
 --]]
-function LocalAudio:ResumeAudio(Id: string, Parent: Instance?): nil
+function LocalAudio:ResumeAudio(Id: string, Parent: Instance?): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in pairs(ValueContainer:GetChildren()) do
         local StateObject = self.ValuesToStateObjects[SoundValue]
@@ -183,7 +186,7 @@ end
 --[[
 Pauses an audio on the client.
 --]]
-function LocalAudio:PauseAudio(Id: string, Parent: Instance?): nil
+function LocalAudio:PauseAudio(Id: string, Parent: Instance?): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in pairs(ValueContainer:GetChildren()) do
         local StateObject = self.ValuesToStateObjects[SoundValue]
@@ -197,7 +200,7 @@ end
 --[[
 Stops an audio on the client.
 --]]
-function LocalAudio:StopAudio(Id: string, Parent: Instance?): nil
+function LocalAudio:StopAudio(Id: string, Parent: Instance?): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in pairs(ValueContainer:GetChildren()) do
         if SoundValue.Name ~= Id then continue end
@@ -212,7 +215,7 @@ end
 --[[
 Sets the effects for a sound.
 --]]
-function LocalAudio:SetEffects(Id: string, Parent: Instance?, Effects: {[string]: {[string]: any}}): nil
+function LocalAudio:SetEffects(Id: string, Parent: Instance?, Effects: {[string]: {[string]: any}}): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in pairs(ValueContainer:GetChildren()) do
         local StateObject = self.ValuesToStateObjects[SoundValue]
@@ -235,7 +238,7 @@ end
 --[[
 Sets up the sounds on the client.
 --]]
-function LocalAudio:SetUp(): nil
+function LocalAudio:SetUp(): ()
     --Connect preloading audios.
     PreloadAudioEvent.OnClientEvent:Connect(function(Id: string)
         self:PreloadAudio(Id)

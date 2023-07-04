@@ -41,9 +41,13 @@ function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Inst
     self.SoundData = SoundData
 
     --Create the sound.
+    local SoundId = SoundData.Id
+    if typeof(SoundId) ~= "string" then
+        SoundId = "rbxassetid://"..tostring(SoundId)
+    end
     local Sound = Instance.new("Sound")
     Sound.Name = string.gsub(Id, "%.", "")
-    Sound.SoundId = "rbxassetid://"..tostring(SoundData.Id)
+    Sound.SoundId = SoundId
     for Key, Value in pairs(SoundData.Properties or {}) do
         Sound[Key] = Value
     end
@@ -64,7 +68,7 @@ function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Inst
     end)
 
     --Return the object.
-    return self
+    return self :: any
 end
 
 --[[

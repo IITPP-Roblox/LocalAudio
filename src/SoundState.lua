@@ -87,13 +87,13 @@ function SoundState.new(Id: string, Parent: Instance?): LocalAudioTypes.SoundSta
     StateValue.Parent = ValueParent
 
     --Return the object.
-    return self
+    return self :: any
 end
 
 --[[
 Saves the state.
 --]]
-function SoundState:Save(): nil
+function SoundState:Save(): ()
     --Save the state.
     local LastSaveTime = tick()
     self.StateValue.Value = HttpService:JSONEncode(self.State)
@@ -113,7 +113,7 @@ end
 --[[
 Plays the audio.
 --]]
-function SoundState:Play(): nil
+function SoundState:Play(): ()
     self.State.State = "Play"
     self.State.StartTime = Workspace:GetServerTimeNow() - ((self.SoundData.Properties and self.SoundData.Properties.TimePosition) or 0)
     self.PauseElapsedTime = nil
@@ -123,7 +123,7 @@ end
 --[[
 Resumes the audio.
 --]]
-function SoundState:Resume(): nil
+function SoundState:Resume(): ()
     if self.State.State == "Play" then return end
     self.State.State = "Play"
     self.State.StartTime = Workspace:GetServerTimeNow() - (self.PauseElapsedTime or 0)
@@ -134,7 +134,7 @@ end
 --[[
 Pauses the audio.
 --]]
-function SoundState:Pause(): nil
+function SoundState:Pause(): ()
     if self.State.State == "Stop" then return end
     self.State.State = "Stop"
     self.PauseElapsedTime = (Workspace:GetServerTimeNow() - self.State.StartTime) % self.SoundData.Length
@@ -144,7 +144,7 @@ end
 --[[
 Stops the audio.
 --]]
-function SoundState:Stop(): nil
+function SoundState:Stop(): ()
     if self.State.State == "Stop" then return end
     self.State.State = "Stop"
     self:Save()
@@ -154,7 +154,7 @@ end
 --[[
 Sets the effects of the audio.
 --]]
-function SoundState:SetEffects(Effects: {[string]: {[string]: any}}): nil
+function SoundState:SetEffects(Effects: {[string]: {[string]: any}}): ()
     self.State.Effects = Effects
     self:Save()
 end
