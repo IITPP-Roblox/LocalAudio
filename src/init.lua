@@ -97,7 +97,10 @@ function LocalAudio:PreloadAudio(Id: string): ()
         PreloadAudioEvent:FireAllClients(Id)
     else
         --Preload the audio.
-        local SoundId = "rbxassetid://"..tostring(SoundState.GetSoundData(Id).Id)
+        local SoundId = SoundState.GetSoundData(Id).Id
+        if typeof(SoundId) ~= "string" then
+            SoundId = "rbxassetid://"..tostring(SoundId)
+        end
         if self.PreloadedAudios[SoundId] then return end
         self.PreloadedAudios[SoundId] = true
 

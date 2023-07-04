@@ -25,7 +25,7 @@ return {
                 },
             },
             LocalLooped = {
-                Id = 12222253,
+                Id = "rbxassetid://12222253",
                 Length = 1.207,
                 Events = {
                     {
@@ -43,7 +43,7 @@ return {
                 },
             },
             Global = {
-                Id = 12221967,
+                Id = "rbxasset://sounds/volume_slider.ogg",
                 Length = 0.293,
                 Properties = {
                     Volume = 0.2,
