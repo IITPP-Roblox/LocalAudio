@@ -23,6 +23,9 @@ return {
                         Name = "CheerSecond",
                     },
                 },
+                Tags = {
+                    "TestTag",
+                },
             },
             LocalLooped = {
                 Id = "rbxassetid://12222253",
