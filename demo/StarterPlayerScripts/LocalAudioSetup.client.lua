@@ -19,3 +19,7 @@ end)
 LocalAudio:OnEventFired("CheerStart"):Connect(function(_, _, Parent, Sound)
     print("Cheer sound started on "..tostring(Parent).." in "..tostring(Sound))
 end)
+
+game:GetService("CollectionService"):GetInstanceAddedSignal("TestTag"):Connect(function(Sound)
+    print("Sound tagged: "..Sound:GetFullName())
+end)

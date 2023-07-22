@@ -6,6 +6,7 @@ Instance of a sound on the client.
 
 local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
+local CollectionService = game:GetService("CollectionService")
 local HttpService = game:GetService("HttpService")
 
 local AudioData = require(script.Parent:WaitForChild("AudioData"))
@@ -52,6 +53,9 @@ function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Inst
         Sound[Key] = Value
     end
     Sound.Parent = Parent or SoundService
+    for _, Tag in SoundData.Tags or {} do
+        CollectionService:AddTag(Sound, Tag)
+    end
     self.Sound = Sound
 
     --Connect the value changing.
