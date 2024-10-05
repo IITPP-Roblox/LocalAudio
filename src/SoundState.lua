@@ -86,6 +86,15 @@ function SoundState.new(Id: string, Parent: Instance?): LocalAudioTypes.SoundSta
     self:Play()
     StateValue.Parent = ValueParent
 
+    --Connect the parent destroying.
+    self.EventConnections = {}
+    if Parent then
+        table.insert(self.EventConnections, Parent.Destroying:Connect(function()
+            self:Stop()
+            ValueParent:Destroy()
+        end))
+    end
+
     --Return the object.
     return self :: any
 end
@@ -149,6 +158,11 @@ function SoundState:Stop(): ()
     self.State.State = "Stop"
     self:Save()
     self.StateValue:Destroy()
+
+    for _, EventConnection in self.EventConnections do
+        EventConnection:Disconnect()
+    end
+    self.EventConnections = {}
 end
 
 --[[
