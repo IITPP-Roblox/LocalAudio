@@ -65,8 +65,7 @@ function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Inst
     self:Update()
 
     --Connect the value being destroyed (stopped).
-    ReplicationValue:GetPropertyChangedSignal("Parent"):Connect(function()
-        if ReplicationValue.Parent then return end
+    ReplicationValue.Destroying:Connect(function()
         self.Sound:Stop()
         self.Sound:Destroy()
     end)
