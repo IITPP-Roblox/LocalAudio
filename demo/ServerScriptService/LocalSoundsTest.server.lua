@@ -22,6 +22,7 @@ LocalAudio:PlayAudio("Demo.LocalLooped", TestModels:WaitForChild("Part5"))
 while true do
     for _, TestPart in pairs(TestParts) do
         LocalAudio:PlayAudio("Demo.Local", TestPart)
-        task.wait(1)
+        task.wait(1.2)
+        LocalAudio:StopAudio("Demo.Local", TestPart)
     end
 end
