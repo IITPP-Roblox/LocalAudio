@@ -1,8 +1,5 @@
---[[
-TheNexusAvenger
-
-Plays audios locally.
---]]
+--Plays audios locally.
+--!strict
 
 local ContentProvider = game:GetService("ContentProvider")
 local RunService = game:GetService("RunService")
@@ -14,6 +11,8 @@ local LocalAudio = {}
 LocalAudio.PreloadedAudios = {}
 LocalAudio.ValuesToStateObjects = {}
 setmetatable(LocalAudio.ValuesToStateObjects, {__mode="k"})
+
+export type LocalAudio = typeof(LocalAudio)
 
 
 
@@ -60,7 +59,7 @@ local SoundState = require(script:WaitForChild("SoundState"))
 Returns if an audio is part of a group.
 --]]
 local function IsInGroup(Id: string, Group: string): boolean
-    return Id == Group or string.sub(Id, 1, string.len(Group) + 1) == Group.."."
+    return Id == Group or string.sub(Id, 1, string.len(Group) + 1) == `{Group}.`
 end
 
 --[[
@@ -75,13 +74,15 @@ local function ConnectParent(Parent: Instance): ()
     end
 
     --Connect values being added.
-    local SoundPart = (Parent:IsA("ObjectValue") and Parent.Value)
+    local SoundPart = (Parent:IsA("ObjectValue") and Parent.Value or nil)
     Parent.ChildAdded:Connect(function(ChildValue)
         --OpenSlot is called in case the client has started an audio before the server plays a new one.
         LocalAudio:OpenSlot(ChildValue.Name, true)
+        if not ChildValue:IsA("StringValue") then return end
         ClientSound.new(ChildValue.Name, ChildValue, SoundPart, LocalAudio.OnEventBindableEvent)
     end)
-    for _, ChildValue in pairs(Parent:GetChildren()) do
+    for _, ChildValue in Parent:GetChildren() do
+        if not ChildValue:IsA("StringValue") then continue end
         ClientSound.new(ChildValue.Name, ChildValue, SoundPart, LocalAudio.OnEventBindableEvent)
     end
 end
@@ -91,7 +92,7 @@ end
 --[[
 Preloads an audio on the client.
 --]]
-function LocalAudio:PreloadAudio(Id: string): ()
+function LocalAudio.PreloadAudio(self: LocalAudio, Id: string): ()
     if RunService:IsServer() then
         --Tell the clients to preload the audio.
         PreloadAudioEvent:FireAllClients(Id)
@@ -99,13 +100,14 @@ function LocalAudio:PreloadAudio(Id: string): ()
         --Preload the audio.
         local SoundId = SoundState.GetSoundData(Id).Id
         if typeof(SoundId) ~= "string" then
-            SoundId = "rbxassetid://"..tostring(SoundId)
+            SoundId = `rbxassetid://{SoundId}`
         end
-        if self.PreloadedAudios[SoundId] then return end
-        self.PreloadedAudios[SoundId] = true
+        local SoundIdString = SoundId :: string
+        if self.PreloadedAudios[SoundIdString] then return end
+        self.PreloadedAudios[SoundIdString] = true
 
         local Sound = Instance.new("Sound")
-        Sound.SoundId = SoundId
+        Sound.SoundId = SoundIdString
         ContentProvider:PreloadAsync({Sound})
     end
 end
@@ -113,11 +115,12 @@ end
 --[[
 Returns the StringValues of the audios playing for the group.
 --]]
-function LocalAudio:GetValuesInGroup(Group: string): {StringValue}
+function LocalAudio.GetValuesInGroup(self: LocalAudio, Group: string): {StringValue}
     local SoundValues = {}
-    for _, ValueContainer in pairs(CurrentAudioFolder:GetChildren()) do
-        for _, SoundValue in pairs(ValueContainer:GetChildren()) do
+    for _, ValueContainer in CurrentAudioFolder:GetChildren() do
+        for _, SoundValue in ValueContainer:GetChildren() do
             if not IsInGroup(SoundValue.Name, Group) then continue end
+            if not SoundValue:IsA("StringValue") then continue end
             table.insert(SoundValues, SoundValue)
         end
     end
@@ -127,8 +130,8 @@ end
 --[[
 Returns if there is an open slot for the given id or group.
 --]]
-function LocalAudio:HasOpenSlot(IdOrGroup: string): boolean
-    for Group, Limit in pairs(AudioData.MaxConcurrentTracks or {}) do
+function LocalAudio.HasOpenSlot(self: LocalAudio, IdOrGroup: string): boolean
+    for Group, Limit in (AudioData.MaxConcurrentTracks or {}) :: {[string]: number} do
         if not IsInGroup(IdOrGroup, Group) then continue end
         if #self:GetValuesInGroup(Group) < Limit then continue end
         return false
@@ -139,8 +142,8 @@ end
 --[[
 Opens a slot for the given audio id to be played. Does nothing if there are no limits.
 --]]
-function LocalAudio:OpenSlot(Id: string, LeaveAtLimit: boolean?): ()
-    for Group, Limit in pairs(AudioData.MaxConcurrentTracks or {}) do
+function LocalAudio.OpenSlot(self: LocalAudio, Id: string, LeaveAtLimit: boolean?): ()
+    for Group, Limit in (AudioData.MaxConcurrentTracks or {}) :: {[string]: number} do
         if not IsInGroup(Id, Group) then continue end
         local SoundValues = self:GetValuesInGroup(Group)
         while #SoundValues >= (LeaveAtLimit and Limit + 1 or Limit) do
@@ -157,7 +160,7 @@ end
 --[[
 Plays an audio on the client.
 --]]
-function LocalAudio:PlayAudio(Id: string, Parent: Instance?): ()
+function LocalAudio.PlayAudio(self: LocalAudio,Id: string, Parent: Instance?): ()
     --Return if the audio is not able to open a slot.
     local SoundData = SoundState.GetSoundData(Id)
     if SoundData.LowPriority and not self:HasOpenSlot(Id) then
@@ -172,9 +175,10 @@ end
 --[[
 Reumes an audio on the client.
 --]]
-function LocalAudio:ResumeAudio(Id: string, Parent: Instance?): ()
+function LocalAudio.ResumeAudio(self: LocalAudio,Id: string, Parent: Instance?): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
-    for _, SoundValue in pairs(ValueContainer:GetChildren()) do
+    for _, SoundValue in ValueContainer:GetChildren() do
+        if not SoundValue:IsA("StringValue") then continue end
         local StateObject = self.ValuesToStateObjects[SoundValue]
         if SoundValue.Name ~= Id then continue end
         if not StateObject or StateObject.State.State ~= "Stop" then continue end
@@ -186,9 +190,10 @@ end
 --[[
 Pauses an audio on the client.
 --]]
-function LocalAudio:PauseAudio(Id: string, Parent: Instance?): ()
+function LocalAudio.PauseAudio(self: LocalAudio,Id: string, Parent: Instance?): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
-    for _, SoundValue in pairs(ValueContainer:GetChildren()) do
+    for _, SoundValue in ValueContainer:GetChildren() do
+        if not SoundValue:IsA("StringValue") then continue end
         local StateObject = self.ValuesToStateObjects[SoundValue]
         if SoundValue.Name ~= Id then continue end
         if not StateObject or StateObject.State.State ~= "Play" then continue end
@@ -200,9 +205,10 @@ end
 --[[
 Stops an audio on the client.
 --]]
-function LocalAudio:StopAudio(Id: string, Parent: Instance?): ()
+function LocalAudio.StopAudio(self: LocalAudio,Id: string, Parent: Instance?): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
-    for _, SoundValue in pairs(ValueContainer:GetChildren()) do
+    for _, SoundValue in ValueContainer:GetChildren() do
+        if not SoundValue:IsA("StringValue") then continue end
         if SoundValue.Name ~= Id then continue end
         if self.ValuesToStateObjects[SoundValue] then
             self.ValuesToStateObjects[SoundValue]:Stop()
@@ -215,9 +221,10 @@ end
 --[[
 Sets the effects for a sound.
 --]]
-function LocalAudio:SetEffects(Id: string, Parent: Instance?, Effects: {[string]: {[string]: any}}): ()
+function LocalAudio.SetEffects(self: LocalAudio,Id: string, Parent: Instance?, Effects: {[string]: {[string]: any}}): ()
     local ValueContainer = SoundState.GetValueContainer(Parent)
-    for _, SoundValue in pairs(ValueContainer:GetChildren()) do
+    for _, SoundValue in ValueContainer:GetChildren() do
+        if not SoundValue:IsA("StringValue") then continue end
         local StateObject = self.ValuesToStateObjects[SoundValue]
         if SoundValue.Name ~= Id then continue end
         if not StateObject or StateObject.State.State ~= "Play" then continue end
@@ -228,7 +235,7 @@ end
 --[[
 Returns an event specific to the an event of a specific name being fired.
 --]]
-function LocalAudio:OnEventFired(Name: string): RBXScriptSignal
+function LocalAudio.OnEventFired(self: LocalAudio,Name: string): RBXScriptSignal
     if not self.NameEvents[Name] then
         self.NameEvents[Name] = Instance.new("BindableEvent")
     end
@@ -238,7 +245,7 @@ end
 --[[
 Sets up the sounds on the client.
 --]]
-function LocalAudio:SetUp(): ()
+function LocalAudio.SetUp(self: LocalAudio): ()
     --Connect preloading audios.
     PreloadAudioEvent.OnClientEvent:Connect(function(Id: string)
         self:PreloadAudio(Id)
@@ -246,7 +253,7 @@ function LocalAudio:SetUp(): ()
 
     --Set up values being created (sounds being played).
     CurrentAudioFolder.ChildAdded:Connect(ConnectParent)
-    for _, ValueParent in pairs(CurrentAudioFolder:GetChildren()) do
+    for _, ValueParent in CurrentAudioFolder:GetChildren() do
         task.spawn(function()
             ConnectParent(ValueParent)
         end)

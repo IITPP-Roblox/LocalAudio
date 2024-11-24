@@ -1,8 +1,5 @@
---[[
-TheNexusAvenger
-
-Manages the state of sounds.
---]]
+--Manages the state of sounds.
+--!strict
 
 local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
@@ -16,32 +13,48 @@ SoundState.__index = SoundState
 
 local CurrentAudioFolder = script.Parent:WaitForChild("CurrentAudio")
 
+export type SoundStateEnum = "Play" | "Stop"
+export type SoundState = {
+    SoundData: LocalAudioTypes.SoundDataEntry,
+    State: {
+        StartTime: number,
+        State: SoundStateEnum,
+        Effects: {[string]: {[string]: any}}?,
+    },
+    EventConnections: {RBXScriptConnection},
+    StateValue: StringValue,
+    LastSaveTime: number?,
+    PauseElapsedTime: number?,
+} & typeof(setmetatable({}, SoundState))
+
 
 
 --[[
 Returns the container for a sound parent.
 --]]
 function SoundState.GetValueContainer(Parent: Instance?): Instance
-    local ValueParent = nil
+    local ValueParent: Instance? = nil
     if Parent then
-        for _, ValueObject in pairs(CurrentAudioFolder:GetChildren()) do
+        for _, ValueObject in CurrentAudioFolder:GetChildren() do
             if ValueObject:IsA("ObjectValue") and ValueObject.Value == Parent then
                 return ValueObject
             end
         end
-        ValueParent = Instance.new("ObjectValue")
-        ValueParent.Name = Parent.Name
-        ValueParent.Value = Parent
-        ValueParent.Parent = CurrentAudioFolder
+        local NewValueParent = Instance.new("ObjectValue")
+        NewValueParent.Name = Parent.Name
+        NewValueParent.Value = Parent
+        NewValueParent.Parent = CurrentAudioFolder
+        ValueParent = NewValueParent
     else
         ValueParent = CurrentAudioFolder:FindFirstChildOfClass("Folder")
         if not ValueParent then
-            ValueParent = Instance.new("Folder")
-            ValueParent.Name = "Global"
-            ValueParent.Parent = CurrentAudioFolder
+            local NewValueParent = Instance.new("Folder")
+            NewValueParent.Name = "Global"
+            NewValueParent.Parent = CurrentAudioFolder
+            ValueParent = NewValueParent
         end
     end
-    return ValueParent
+    return ValueParent :: Instance
 end
 
 --[[
@@ -49,10 +62,10 @@ Returns the sound data for a given id.
 --]]
 function SoundState.GetSoundData(Id: string): LocalAudioTypes.SoundDataEntry
     local SoundData = AudioData.Sounds
-    for _, Tag in pairs(string.split(Id, ".")) do
+    for _, Tag in string.split(Id, ".") do
         SoundData = SoundData[Tag]
         if SoundData == nil then
-            error("Sound not found: "..Id.." at part "..Tag)
+            error(`Sound not found: {Id} at part {Tag}`)
         end
     end
     return SoundData
@@ -61,22 +74,18 @@ end
 --[[
 Creates the sound state.
 --]]
-function SoundState.new(Id: string, Parent: Instance?): LocalAudioTypes.SoundState
+function SoundState.new(Id: string, Parent: Instance?): SoundState
     --Create the object.
-    local self = {}
-    setmetatable(self, SoundState)
-
-    --Get the sound data.
     local SoundData = SoundState.GetSoundData(Id)
-    self.SoundData = SoundData
-
-    --Build the state.
-    local State = {
-        StartTime = Workspace:GetServerTimeNow(),
-        State = "Play",
-        Effects = SoundData.Effects,
-    }
-    self.State = State
+    local self = setmetatable({
+        SoundData = SoundData,
+        State = {
+            StartTime = Workspace:GetServerTimeNow(),
+            State = "Play" :: SoundStateEnum,
+            Effects = SoundData.Effects,
+        },
+        EventConnections = {},
+    }, SoundState) :: SoundState
 
     --Create the value.
     local ValueParent = SoundState.GetValueContainer(Parent)
@@ -87,7 +96,6 @@ function SoundState.new(Id: string, Parent: Instance?): LocalAudioTypes.SoundSta
     StateValue.Parent = ValueParent
 
     --Connect the parent destroying.
-    self.EventConnections = {}
     if Parent then
         table.insert(self.EventConnections, Parent.Destroying:Connect(function()
             self:Stop()
@@ -102,7 +110,7 @@ end
 --[[
 Saves the state.
 --]]
-function SoundState:Save(): ()
+function SoundState.Save(self: SoundState): ()
     --Save the state.
     local LastSaveTime = tick()
     self.StateValue.Value = HttpService:JSONEncode(self.State)
@@ -122,7 +130,7 @@ end
 --[[
 Plays the audio.
 --]]
-function SoundState:Play(): ()
+function SoundState.Play(self: SoundState): ()
     self.State.State = "Play"
     self.State.StartTime = Workspace:GetServerTimeNow() - ((self.SoundData.Properties and self.SoundData.Properties.TimePosition) or 0)
     self.PauseElapsedTime = nil
@@ -132,7 +140,7 @@ end
 --[[
 Resumes the audio.
 --]]
-function SoundState:Resume(): ()
+function SoundState.Resume(self: SoundState): ()
     if self.State.State == "Play" then return end
     self.State.State = "Play"
     self.State.StartTime = Workspace:GetServerTimeNow() - (self.PauseElapsedTime or 0)
@@ -143,7 +151,7 @@ end
 --[[
 Pauses the audio.
 --]]
-function SoundState:Pause(): ()
+function SoundState.Pause(self: SoundState): ()
     if self.State.State == "Stop" then return end
     self.State.State = "Stop"
     self.PauseElapsedTime = (Workspace:GetServerTimeNow() - self.State.StartTime) % self.SoundData.Length
@@ -153,7 +161,7 @@ end
 --[[
 Stops the audio.
 --]]
-function SoundState:Stop(): ()
+function SoundState.Stop(self: SoundState): ()
     if self.State.State == "Stop" then return end
     self.State.State = "Stop"
     self:Save()
@@ -168,7 +176,7 @@ end
 --[[
 Sets the effects of the audio.
 --]]
-function SoundState:SetEffects(Effects: {[string]: {[string]: any}}): ()
+function SoundState.SetEffects(self: SoundState, Effects: {[string]: {[string]: any}}): ()
     self.State.Effects = Effects
     self:Save()
 end

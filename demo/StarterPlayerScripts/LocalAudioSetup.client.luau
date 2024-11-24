@@ -1,8 +1,5 @@
---[[
-TheNexusAvenger
-
-Sets up the LocalAudio module.
---]]
+--Sets up the LocalAudio module.
+--!strict
 
 local LocalAudio = require(game:GetService("ReplicatedStorage"):WaitForChild("LocalAudio"))
 LocalAudio:SetUp()
@@ -17,9 +14,9 @@ LocalAudio.OnEvent:Connect(function(Id, Event, Parent, Sound)
 end)
 
 LocalAudio:OnEventFired("CheerStart"):Connect(function(_, _, Parent, Sound)
-    print("Cheer sound started on "..tostring(Parent).." in "..tostring(Sound))
+    print(`Cheer sound started on {Parent} in {Sound}`)
 end)
 
 game:GetService("CollectionService"):GetInstanceAddedSignal("TestTag"):Connect(function(Sound)
-    print("Sound tagged: "..Sound:GetFullName())
+    print(`Sound tagged: {Sound:GetFullName()}`)
 end)
