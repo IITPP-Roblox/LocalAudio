@@ -1,8 +1,5 @@
---[[
-TheNexusAvenger
-
-Audio for the test demo.
---]]
+--Audio for the test demo.
+--!strict
 
 return {
     MaxConcurrentTracks = {

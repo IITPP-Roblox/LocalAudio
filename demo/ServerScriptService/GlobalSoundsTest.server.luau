@@ -1,8 +1,5 @@
---[[
-TheNexusAvenger
-
-Tests playing global audios.
---]]
+--Tests playing global audios.
+--!strict
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalAudio = require(ReplicatedStorage:WaitForChild("LocalAudio"))

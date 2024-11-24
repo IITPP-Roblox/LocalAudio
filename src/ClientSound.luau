@@ -1,8 +1,5 @@
---[[
-TheNexusAvenger
-
-Instance of a sound on the client.
---]]
+--Instance of a sound on the client.
+--!strict
 
 local Workspace = game:GetService("Workspace")
 local SoundService = game:GetService("SoundService")
@@ -16,44 +13,52 @@ local ClientSound = {}
 ClientSound.InitialTimePositionIgnore = 0.5
 ClientSound.__index = ClientSound
 
+export type ClientSound = {
+    Id: string,
+    Parent: Instance?,
+    ReplicationValue: StringValue,
+    OnEvent: BindableEvent,
+    SoundData: LocalAudioTypes.SoundDataEntry,
+    Sound: Sound,
+} & typeof(setmetatable({}, ClientSound))
+
 
 
 --[[
 Creates the client sound.
 --]]
-function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Instance?, OnEvent: BindableEvent): LocalAudioTypes.ClientSound
+function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Instance?, OnEvent: BindableEvent): ClientSound
     --Create the object.
-    local self = {
+    local self = setmetatable({
         Id = Id,
         Parent = Parent,
         ReplicationValue = ReplicationValue,
         OnEvent = OnEvent,
-    }
-    setmetatable(self, ClientSound)
+    }, ClientSound) :: ClientSound
 
     --Get the sound data.
     local SoundData = AudioData.Sounds
-    for _, Tag in pairs(string.split(Id, ".")) do
-        SoundData = SoundData[Tag]
+    for _, Tag in string.split(Id, ".") do
+        SoundData = (SoundData :: LocalAudioTypes.SoundDataEntry)[Tag]
         if SoundData == nil then
-            error("Sound not found: "..Id.." at part "..Tag)
+            error(`Sound not found: {Id} at part {Tag}`)
         end
     end
-    self.SoundData = SoundData
+    self.SoundData = SoundData :: LocalAudioTypes.SoundDataEntry
 
     --Create the sound.
     local SoundId = SoundData.Id
     if typeof(SoundId) ~= "string" then
-        SoundId = "rbxassetid://"..tostring(SoundId)
+        SoundId = `rbxassetid://{SoundId}`
     end
     local Sound = Instance.new("Sound")
     Sound.Name = string.gsub(Id, "%.", "")
-    Sound.SoundId = SoundId
-    for Key, Value in pairs(SoundData.Properties or {}) do
-        Sound[Key] = Value
+    Sound.SoundId = SoundId :: string
+    for Key, Value in (SoundData.Properties or {}) :: {[string]: any} do
+        (Sound :: any)[Key] = Value
     end
     Sound.Parent = Parent or SoundService
-    for _, Tag in SoundData.Tags or {} do
+    for _, Tag in (SoundData.Tags or {}) :: {string} do
         CollectionService:AddTag(Sound, Tag)
     end
     self.Sound = Sound
@@ -71,29 +76,29 @@ function ClientSound.new(Id: string, ReplicationValue: StringValue, Parent: Inst
     end)
 
     --Return the object.
-    return self :: any
+    return self
 end
 
 --[[
 Updates the sound based on the latest value.
 --]]
-function ClientSound:Update()
+function ClientSound.Update(self: ClientSound): ()
     --Read the replication data.
     local ReplicationData = HttpService:JSONDecode(self.ReplicationValue.Value)
 
     --Update the effects.
     local Effects = ReplicationData.Effects or {}
-    for _, ExistingEffect in pairs(self.Sound:GetChildren()) do
+    for _, ExistingEffect in self.Sound:GetChildren() do
         if Effects[ExistingEffect.ClassName] then continue end
         ExistingEffect:Destroy()
     end
-    for EffectType, EffectData in pairs(Effects) do
-        local ExistingEffect = self.Sound:FindFirstChildOfClass(EffectType)
+    for EffectType, EffectData in Effects do
+        local ExistingEffect = self.Sound:FindFirstChildOfClass(EffectType) :: Instance
         if not ExistingEffect then
             ExistingEffect = Instance.new(EffectType)
         end
-        for Key, Value in pairs(EffectData) do
-            ExistingEffect[Key] = Value
+        for Key, Value in EffectData do
+            (ExistingEffect :: any)[Key] = Value
         end
         ExistingEffect.Parent = self.Sound
     end
