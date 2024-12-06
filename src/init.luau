@@ -9,8 +9,6 @@ local LocalAudioTypes = require(script:WaitForChild("LocalAudioTypes"))
 
 local LocalAudio = {}
 LocalAudio.PreloadedAudios = {}
-LocalAudio.ValuesToStateObjects = {}
-setmetatable(LocalAudio.ValuesToStateObjects, {__mode="k"})
 
 export type LocalAudio = typeof(LocalAudio)
 
@@ -148,8 +146,8 @@ function LocalAudio.OpenSlot(self: LocalAudio, Id: string, LeaveAtLimit: boolean
         local SoundValues = self:GetValuesInGroup(Group)
         while #SoundValues >= (LeaveAtLimit and Limit + 1 or Limit) do
             local SoundValue = SoundValues[1]
-            if self.ValuesToStateObjects[SoundValue] then
-                self.ValuesToStateObjects[SoundValue]:Stop()
+            if SoundState.ActiveSoundStates[SoundValue] then
+                SoundState.ActiveSoundStates[SoundValue]:Stop()
             end
             SoundValue:Destroy()
             table.remove(SoundValues, 1)
@@ -168,8 +166,7 @@ function LocalAudio.PlayAudio(self: LocalAudio,Id: string, Parent: Instance?): (
     end
 
     --Play the new audio.
-    local Sound = SoundState.new(Id, Parent)
-    self.ValuesToStateObjects[Sound.StateValue] = Sound
+    SoundState.new(Id, Parent)
 end
 
 --[[
@@ -179,7 +176,7 @@ function LocalAudio.ResumeAudio(self: LocalAudio,Id: string, Parent: Instance?):
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in ValueContainer:GetChildren() do
         if not SoundValue:IsA("StringValue") then continue end
-        local StateObject = self.ValuesToStateObjects[SoundValue]
+        local StateObject = SoundState.ActiveSoundStates[SoundValue]
         if SoundValue.Name ~= Id then continue end
         if not StateObject or StateObject.State.State ~= "Stop" then continue end
         StateObject:Resume()
@@ -194,7 +191,7 @@ function LocalAudio.PauseAudio(self: LocalAudio,Id: string, Parent: Instance?): 
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in ValueContainer:GetChildren() do
         if not SoundValue:IsA("StringValue") then continue end
-        local StateObject = self.ValuesToStateObjects[SoundValue]
+        local StateObject = SoundState.ActiveSoundStates[SoundValue]
         if SoundValue.Name ~= Id then continue end
         if not StateObject or StateObject.State.State ~= "Play" then continue end
         StateObject:Pause()
@@ -210,8 +207,8 @@ function LocalAudio.StopAudio(self: LocalAudio,Id: string, Parent: Instance?): (
     for _, SoundValue in ValueContainer:GetChildren() do
         if not SoundValue:IsA("StringValue") then continue end
         if SoundValue.Name ~= Id then continue end
-        if self.ValuesToStateObjects[SoundValue] then
-            self.ValuesToStateObjects[SoundValue]:Stop()
+        if SoundState.ActiveSoundStates[SoundValue] then
+            SoundState.ActiveSoundStates[SoundValue]:Stop()
         end
         SoundValue:Destroy()
         break
@@ -225,7 +222,7 @@ function LocalAudio.SetEffects(self: LocalAudio,Id: string, Parent: Instance?, E
     local ValueContainer = SoundState.GetValueContainer(Parent)
     for _, SoundValue in ValueContainer:GetChildren() do
         if not SoundValue:IsA("StringValue") then continue end
-        local StateObject = self.ValuesToStateObjects[SoundValue]
+        local StateObject = SoundState.ActiveSoundStates[SoundValue]
         if SoundValue.Name ~= Id then continue end
         if not StateObject or StateObject.State.State ~= "Play" then continue end
         StateObject:SetEffects(Effects)

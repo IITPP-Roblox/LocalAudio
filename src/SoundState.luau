@@ -9,6 +9,7 @@ local LocalAudioTypes = require(script.Parent:WaitForChild("LocalAudioTypes"))
 
 local SoundState = {}
 SoundState.AutomaticClearDelay = 3 --An additional delay is added to clearing audios to mitigate audios cutting out on the client.
+SoundState.ActiveSoundStates = {}
 SoundState.__index = SoundState
 
 local CurrentAudioFolder = script.Parent:WaitForChild("CurrentAudio")
@@ -92,6 +93,7 @@ function SoundState.new(Id: string, Parent: Instance?): SoundState
     local StateValue = Instance.new("StringValue")
     StateValue.Name = Id
     self.StateValue = StateValue
+    self.ActiveSoundStates[StateValue] = self
     self:Play()
     StateValue.Parent = ValueParent
 
@@ -104,7 +106,7 @@ function SoundState.new(Id: string, Parent: Instance?): SoundState
     end
 
     --Return the object.
-    return self :: any
+    return self
 end
 
 --[[
@@ -171,6 +173,7 @@ function SoundState.Stop(self: SoundState): ()
         EventConnection:Disconnect()
     end
     self.EventConnections = {}
+    self.ActiveSoundStates[self.StateValue] = nil
 end
 
 --[[
