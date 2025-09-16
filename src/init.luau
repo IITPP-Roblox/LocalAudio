@@ -8,8 +8,12 @@ local AudioData = require(script:WaitForChild("AudioData"))
 local LocalAudioTypes = require(script:WaitForChild("LocalAudioTypes"))
 
 local LocalAudio = {}
+LocalAudio.AudioData = AudioData
 LocalAudio.PreloadedAudios = {}
 
+export type SoundDataEntryEvent = LocalAudioTypes.SoundDataEntryEvent
+export type SoundDataEntry = LocalAudioTypes.SoundDataEntry
+export type SoundData = LocalAudioTypes.SoundData
 export type LocalAudio = typeof(LocalAudio)
 
 

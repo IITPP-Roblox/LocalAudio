@@ -4,7 +4,7 @@ repository = "https://github.com/IITPP-Roblox/LocalAudio"
 description = "Module for playing audios on demand as data instead of instances."
 license = "MIT"
 authors = ["IITPP-Roblox"]
-version = "1.5.1"
+version = "1.5.2"
 
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
