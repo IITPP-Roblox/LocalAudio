@@ -36,7 +36,7 @@ is an example if LocalAudio is directly under `ReplicatedStorage`.
 require(game:GetService("ReplicatedStorage"):WaitForChild("LocalAudio")):SetUp()
 ```
 
-The specific location of LocalTween does not matter as long as `SetUp`
+The specific location of LocalAudio does not matter as long as `SetUp`
 is called on the client.
 
 ### Data Setup
